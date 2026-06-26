@@ -1,20 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home.jsx';
 import AuthPage from './pages/AuthPage.jsx';
 import VideoPlayer from './pages/VideoPlayer.jsx';
 import Channel from './pages/Channel.jsx';
+import Header from './components/Header.jsx';     // <-- Import Header Anchor
+import Sidebar from './components/Sidebar.jsx';   // <-- Import Sidebar Anchor
 
 function App() {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
+
   return (
     <Router>
       <div className="app-container">
-        {/* Header navigation element will be injected here later globally */}
+        {/* Render Header globally across all interface views */}
+        <Header toggleSidebar={toggleSidebar} />
         
         <div className="main-layout">
-          {/* Sidebar drawer component will sit here globally later */}
+          {/* Render Sidebar context wrapper alongside main page targets */}
+          <Sidebar isCollapsed={isSidebarCollapsed} />
           
-          <main className="content-area">
+          <main className={`content-area ${isSidebarCollapsed ? 'expanded-width' : 'normal-width'}`}>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/auth" element={<AuthPage />} />
