@@ -2,7 +2,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db.js';
-import authRoutes from './routes/authRoutes.js'; // <-- Import Auth Routes
+import authRoutes from './routes/authRoutes.js';
+import videoRoutes from './routes/videoRoutes.js'; // <-- Import Video Router Layout
 
 dotenv.config();
 connectDB();
@@ -13,7 +14,8 @@ app.use(cors());
 app.use(express.json());
 
 // API Middlewares mounting endpoints
-app.use('/api/auth', authRoutes); // <-- Mount Auth Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/videos', videoRoutes); // <-- Mount Video Routes Endpoint Array
 
 app.get('/', (req, res) => {
   res.send('YouTube Clone MERN Backend API is running smoothly...');
