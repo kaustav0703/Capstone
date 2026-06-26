@@ -1,5 +1,5 @@
-import Video from '../models/Video.js';
-import Channel from '../models/Channel.js';
+import Video from "../models/Video.js";
+import Channel from "../models/Channel.js";
 
 // @desc    Get all videos with optional category filters or search queries
 // @route   GET /api/videos
@@ -9,20 +9,28 @@ export const getAllVideos = async (req, res) => {
     let queryFilter = {};
 
     // 1. Apply category filtering if a selector tag is passed from the frontend ribbon
-    if (category && category !== 'All') {
+    if (category && category !== "All") {
       queryFilter.category = category;
     }
 
     // 2. Apply text search query validation using regex for structural match matches
     if (search) {
-      queryFilter.title = { $regex: search, $options: 'i' }; // 'i' flag ignores upper/lowercase letters
+      queryFilter.title = { $regex: search, $options: "i" }; // 'i' flag ignores upper/lowercase letters
     }
 
     // Fetch and populate relevant channel reference data
-    const videos = await Video.find(queryFilter).populate('channelId', 'channelName channelBanner subscribers');
+    const videos = await Video.find(queryFilter).populate(
+      "channelId",
+      "channelName channelBanner subscribers",
+    );
     return res.status(200).json(videos);
   } catch (error) {
-    return res.status(500).json({ message: 'Error fetching videos collection', error: error.message });
+    return res
+      .status(500)
+      .json({
+        message: "Error fetching videos collection",
+        error: error.message,
+      });
   }
 };
 
@@ -34,16 +42,21 @@ export const getVideoById = async (req, res) => {
     const video = await Video.findByIdAndUpdate(
       req.params.id,
       { $inc: { views: 1 } },
-      { new: true }
-    ).populate('channelId', 'channelName channelBanner subscribers owner');
+      { new: true },
+    ).populate("channelId", "channelName channelBanner subscribers owner");
 
     if (!video) {
-      return res.status(404).json({ message: 'Video record not found' });
+      return res.status(404).json({ message: "Video record not found" });
     }
 
     return res.status(200).json(video);
   } catch (error) {
-    return res.status(500).json({ message: 'Error retrieving single video entry', error: error.message });
+    return res
+      .status(500)
+      .json({
+        message: "Error retrieving single video entry",
+        error: error.message,
+      });
   }
 };
 
@@ -51,21 +64,32 @@ export const getVideoById = async (req, res) => {
 // @route   POST /api/videos
 // @access  Private (Requires JWT token authentication check)
 export const createVideo = async (req, res) => {
-  const { title, videoUrl, thumbnailUrl, description, category, channelId } = req.body;
+  const { title, videoUrl, thumbnailUrl, description, category, channelId } =
+    req.body;
 
   try {
     if (!title || !videoUrl || !thumbnailUrl || !category || !channelId) {
-      return res.status(400).json({ message: 'Missing required validation fields for video object' });
+      return res
+        .status(400)
+        .json({
+          message: "Missing required validation fields for video object",
+        });
     }
 
     // Confirm that the channel exists and matches the user attempting the upload
     const channel = await Channel.findById(channelId);
     if (!channel) {
-      return res.status(404).json({ message: 'Target studio channel context not found' });
+      return res
+        .status(404)
+        .json({ message: "Target studio channel context not found" });
     }
 
     if (channel.owner.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'Unauthorised: You do not own this studio channel profile' });
+      return res
+        .status(403)
+        .json({
+          message: "Unauthorised: You do not own this studio channel profile",
+        });
     }
 
     // Save video into DB mapping both uploader and context identifiers
@@ -85,7 +109,12 @@ export const createVideo = async (req, res) => {
 
     return res.status(201).json(newVideo);
   } catch (error) {
-    return res.status(500).json({ message: 'Error processing server video post data', error: error.message });
+    return res
+      .status(500)
+      .json({
+        message: "Error processing server video post data",
+        error: error.message,
+      });
   }
 };
 
@@ -95,23 +124,35 @@ export const createVideo = async (req, res) => {
 export const likeVideo = async (req, res) => {
   try {
     const video = await Video.findById(req.params.id);
-    if (!video) return res.status(404).json({ message: 'Video target not found' });
+    if (!video)
+      return res.status(404).json({ message: "Video target not found" });
 
     const userId = req.user._id;
 
     // Check if user has already liked this video item
     if (video.likes.includes(userId)) {
-      video.likes = video.likes.filter((id) => id.toString() !== userId.toString());
+      video.likes = video.likes.filter(
+        (id) => id.toString() !== userId.toString(),
+      );
     } else {
       video.likes.push(userId);
       // Remove user from dislike track listing automatically on reverse flip actions
-      video.dislikes = video.dislikes.filter((id) => id.toString() !== userId.toString());
+      video.dislikes = video.dislikes.filter(
+        (id) => id.toString() !== userId.toString(),
+      );
     }
 
     await video.save();
-    return res.status(200).json({ likesCount: video.likes.length, dislikesCount: video.dislikes.length });
+    return res
+      .status(200)
+      .json({
+        likesCount: video.likes.length,
+        dislikesCount: video.dislikes.length,
+      });
   } catch (error) {
-    return res.status(500).json({ message: 'Like operation crashed', error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Like operation crashed", error: error.message });
   }
 };
 
@@ -121,20 +162,32 @@ export const likeVideo = async (req, res) => {
 export const dislikeVideo = async (req, res) => {
   try {
     const video = await Video.findById(req.params.id);
-    if (!video) return res.status(404).json({ message: 'Video item target not found' });
+    if (!video)
+      return res.status(404).json({ message: "Video item target not found" });
 
     const userId = req.user._id;
 
     if (video.dislikes.includes(userId)) {
-      video.dislikes = video.dislikes.filter((id) => id.toString() !== userId.toString());
+      video.dislikes = video.dislikes.filter(
+        (id) => id.toString() !== userId.toString(),
+      );
     } else {
       video.dislikes.push(userId);
-      video.likes = video.likes.filter((id) => id.toString() !== userId.toString());
+      video.likes = video.likes.filter(
+        (id) => id.toString() !== userId.toString(),
+      );
     }
 
     await video.save();
-    return res.status(200).json({ likesCount: video.likes.length, dislikesCount: video.dislikes.length });
+    return res
+      .status(200)
+      .json({
+        likesCount: video.likes.length,
+        dislikesCount: video.dislikes.length,
+      });
   } catch (error) {
-    return res.status(500).json({ message: 'Dislike operation crashed', error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Dislike operation crashed", error: error.message });
   }
 };

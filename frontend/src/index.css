@@ -569,3 +569,28 @@ body {
 .comment-save-btn { background-color: #065fd4; color: #fff; border: none; padding: 6px 12px; border-radius: 12px; cursor: pointer; font-size: 13px; }
 
 .player-status-banner { text-align: center; padding: 64px; font-size: 16px; color: var(--text-secondary); }
+
+/* --- FORCES CRITICAL LINK REGIONS TO VISUALLY RENDER --- */
+.comment-owner-management-row {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  gap: 12px !important;
+  margin-top: 6px !important;
+}
+
+.comment-action-link-btn {
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  color: #606060 !important;
+  text-transform: uppercase !important;
+}
+
+.comment-action-link-btn:hover {
+  color: #065fd4 !important;
+  text-decoration: underline !important;
+}

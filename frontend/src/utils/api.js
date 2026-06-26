@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-// Instantiate localized axios tracking profile
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'http://localhost:5001/api', // Pointing to your active AirPlay-safe port
   headers: {
     'Content-Type': 'application/json',
   },
@@ -11,7 +10,7 @@ const API = axios.create({
 // Structural Interceptor checking for local active tokens before pushing operations
 API.interceptors.request.use(
   (config) => {
-    const profile = localStorage.getItem('ytUserInfo');
+    const profile = localStorage.getItem('ytUserInfo'); // <-- MUST match the key name from Step 1!
     if (profile) {
       const { token } = JSON.parse(profile);
       // Append modern Authorization Bearer scheme payload strings
